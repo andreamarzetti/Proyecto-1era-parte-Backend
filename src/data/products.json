@@ -1,0 +1,47 @@
+[
+    {
+      "id": 1,
+      "title": "Camiseta Básica",
+      "description": "Camiseta básica de algodón, ideal para el día a día.",
+      "code": "CAM-BAS-001",
+      "price": 20.99,
+      "status": true,
+      "stock": 150,
+      "category": "Camisetas",
+      "thumbnails": []
+    },
+    {
+      "id": 2,
+      "title": "Jeans Slim Fit",
+      "description": "Jeans de corte slim fit, cómodo y moderno.",
+      "code": "JEANS-SLIM-002",
+      "price": 49.99,
+      "status": true,
+      "stock": 80,
+      "category": "Pantalones",
+      "thumbnails": []
+    },
+    {
+      "id": 3,
+      "title": "Chaqueta de Cuero",
+      "description": "Chaqueta de cuero para ocasiones especiales.",
+      "code": "CHAQ-CUERO-003",
+      "price": 120.00,
+      "status": true,
+      "stock": 50,
+      "category": "Chaquetas",
+      "thumbnails": []
+    },
+    {
+      "id": 4,
+      "title": "Zapatos Deportivos",
+      "description": "Zapatos deportivos para correr y hacer ejercicio.",
+      "code": "ZAP-DEPORT-004",
+      "price": 75.50,
+      "status": true,
+      "stock": 120,
+      "category": "Zapatos",
+      "thumbnails": []
+    }
+  ]
+  

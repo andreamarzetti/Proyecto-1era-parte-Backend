@@ -1,0 +1,12 @@
+{
+  "name": "1er-pre-entrega-marzetti",
+  "version": "1.0.0",
+  "description": "Proyecto para la primera entrega del curso de backend",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
