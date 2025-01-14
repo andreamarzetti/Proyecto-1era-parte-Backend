@@ -1,0 +1,15 @@
+{{!-- Extender de la plantilla principal --}}
+{{#> main}}
+<h2>Lista de Productos</h2>
+<ul>
+    {{#each products}}
+    <li>
+        <h3>{{this.title}}</h3>
+        <p>{{this.description}}</p>
+        <p><strong>Precio:</strong> ${{this.price}}</p>
+        <p><strong>Stock:</strong> {{this.stock}}</p>
+        <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" width="150">
+    </li>
+    {{/each}}
+</ul>
+{{/main}}

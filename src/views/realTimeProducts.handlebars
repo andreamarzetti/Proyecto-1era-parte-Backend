@@ -1,0 +1,32 @@
+{{!-- Extender de la plantilla principal --}}
+{{#> main}}
+<h2>Productos en Tiempo Real</h2>
+<ul id="product-list">
+    {{#each products}}
+    <li id="product-{{this.id}}">
+        <h3>{{this.title}}</h3>
+        <p><strong>Precio:</strong> ${{this.price}}</p>
+    </li>
+    {{/each}}
+</ul>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    // Actualizar lista de productos en tiempo real
+    socket.on('productList', (products) => {
+        const productList = document.getElementById('product-list');
+        productList.innerHTML = '';
+        products.forEach(product => {
+            const li = document.createElement('li');
+            li.id = `product-${product.id}`;
+            li.innerHTML = `
+                <h3>${product.title}</h3>
+                <p><strong>Precio:</strong> $${product.price}</p>
+            `;
+            productList.appendChild(li);
+        });
+    });
+</script>
+{{/main}}

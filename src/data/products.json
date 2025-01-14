@@ -42,6 +42,14 @@
       "stock": 120,
       "category": "Zapatos",
       "thumbnails": []
+    },
+    {
+      "title": "Gorra",
+      "description": "Gorra de algodón",
+      "price": 15.99,
+      "stock": 100,
+      "category": "Accesorios",
+      "thumbnails": []
     }
   ]
   

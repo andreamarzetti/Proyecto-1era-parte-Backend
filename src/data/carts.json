@@ -31,7 +31,12 @@
         {
           "product": 2,
           "quantity": 2
+        },
+        {
+          "product": 3,
+          "quantity": 3
         }
+
       ]
     }
   ]
