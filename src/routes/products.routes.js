@@ -1,120 +1,96 @@
 const express = require('express');
-const fs = require('fs');
-const path = './src/data/products.json'; // Ruta al archivo JSON de productos
-const io = require('../app').io; // Importar Socket.IO desde el servidor principal
+const ProductManager = require('../managers/ProductsManager');
 
 const router = express.Router();
 
-// Obtener todos los productos
-router.get('/', (req, res) => {
-    const limit = parseInt(req.query.limit) || 0; // Obtener el parámetro 'limit' de la URL
-    fs.readFile(path, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).send({ error: 'Error al leer los productos' });
-        }
-        const products = JSON.parse(data);
-        if (limit > 0) {
-            return res.json(products.slice(0, limit)); // Limitar la cantidad de productos
-        }
-        res.json(products);
+// Obtener todos los productos con filtros, paginación y ordenamientos
+router.get('/', async (req, res) => {
+  try {
+    const { limit = 10, page = 1, sort, query } = req.query;
+    const options = {
+      limit: parseInt(limit),
+      page: parseInt(page),
+      sort: sort ? { price: sort === 'asc' ? 1 : -1 } : {}
+    };
+    const queryObj = query ? { $or: [{ category: query }, { status: query === 'available' }] } : {};
+    const products = await ProductManager.getAll(queryObj, options);
+    res.json({
+      status: 'success',
+      payload: products.docs,
+      totalPages: products.totalPages,
+      prevPage: products.hasPrevPage ? page - 1 : null,
+      nextPage: products.hasNextPage ? page + 1 : null,
+      page: products.page,
+      hasPrevPage: products.hasPrevPage,
+      hasNextPage: products.hasNextPage,
+      prevLink: products.hasPrevPage ? `/api/products?limit=${limit}&page=${page - 1}&sort=${sort}&query=${query}` : null,
+      nextLink: products.hasNextPage ? `/api/products?limit=${limit}&page=${page + 1}&sort=${sort}&query=${query}` : null
     });
+  } catch (error) {
+    res.status(500).send({ error: 'Error al obtener los productos' });
+  }
 });
 
-// Obtener un producto por su ID
-router.get('/:pid', (req, res) => {
-    const pid = req.params.pid;
-    fs.readFile(path, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).send({ error: 'Error al leer los productos' });
-        }
-        const products = JSON.parse(data);
-        const product = products.find(p => p.id == pid);
-        if (!product) {
-            return res.status(404).send({ error: 'Producto no encontrado' });
-        }
-        res.json(product);
-    });
+router.get('/products/:pid', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.pid);
+    if (!product) {
+      return res.status(404).send({ error: 'Producto no encontrado' });
+    }
+    res.render('productDetails', { product });
+  } catch (error) {
+    console.error("Error al obtener el producto:", error);
+    res.status(500).send({ error: 'Error al obtener el producto' });
+  }
 });
 
 // Crear un nuevo producto
-router.post('/', (req, res) => {
-    const { title, description, code, price, status = true, stock, category, thumbnails } = req.body;
-    fs.readFile(path, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).send({ error: 'Error al leer los productos' });
-        }
-        const products = JSON.parse(data);
-        const newProduct = {
-            id: (products.length ? products[products.length - 1].id + 1 : 1), // Generar ID único
-            title,
-            description,
-            code,
-            price,
-            status,
-            stock,
-            category,
-            thumbnails: thumbnails || []
-        };
-        products.push(newProduct);
-        fs.writeFile(path, JSON.stringify(products, null, 2), (err) => {
-            if (err) {
-                return res.status(500).send({ error: 'Error al guardar el producto' });
-            }
-
-            io.emit('productList', products); // Emitir nueva lista de productos en tiempo real
-            res.status(201).json(newProduct);
-        });
-    });
+router.post('/', async (req, res) => {
+  try {
+    const { id, title, description, code, price, status = true, stock, category, thumbnails } = req.body;
+    if (!id || !title || !description || !code || !price || !stock || !category || !thumbnails) {
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+    const newProduct = await ProductManager.createProduct(req.body);
+    res.status(201).json(newProduct);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al crear el producto' });
+  }
 });
 
-// Actualizar un producto
-router.put('/:pid', (req, res) => {
-    const pid = req.params.pid;
-    const { title, description, code, price, status, stock, category, thumbnails } = req.body;
-    fs.readFile(path, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).send({ error: 'Error al leer los productos' });
-        }
-        const products = JSON.parse(data);
-        const productIndex = products.findIndex(p => p.id == pid);
-        if (productIndex === -1) {
-            return res.status(404).send({ error: 'Producto no encontrado' });
-        }
-        const updatedProduct = { ...products[productIndex], title, description, code, price, status, stock, category, thumbnails };
-        products[productIndex] = updatedProduct;
-        fs.writeFile(path, JSON.stringify(products, null, 2), (err) => {
-            if (err) {
-                return res.status(500).send({ error: 'Error al actualizar el producto' });
-            }
+// Obtener un producto por ID
+router.get('/:id', async (req, res) => {
+  try {
+    const product = await ProductManager.getProductById(req.params.id);
+    if (!product) {
+      return res.status(404).send({ error: 'Producto no encontrado' });
+    }
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-            io.emit('productList', products); // Emitir nueva lista de productos en tiempo real
-            res.json(updatedProduct);
-        });
-    });
+// Actualizar un producto existente
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedProduct = await ProductManager.updateProduct(req.params.id, req.body);
+    req.io.emit('productList', await ProductManager.getAll({}, {})); // Emitir nueva lista de productos en tiempo real
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(500).send({ error: error.message || 'Error al actualizar el producto' });
+  }
 });
 
 // Eliminar un producto
-router.delete('/:pid', (req, res) => {
-    const pid = req.params.pid;
-    fs.readFile(path, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).send({ error: 'Error al leer los productos' });
-        }
-        let products = JSON.parse(data);
-        const productIndex = products.findIndex(p => p.id == pid);
-        if (productIndex === -1) {
-            return res.status(404).send({ error: 'Producto no encontrado' });
-        }
-        products = products.filter(p => p.id != pid);
-        fs.writeFile(path, JSON.stringify(products, null, 2), (err) => {
-            if (err) {
-                return res.status(500).send({ error: 'Error al eliminar el producto' });
-            }
-
-            io.emit('productList', products); // Emitir nueva lista de productos en tiempo real
-            res.status(200).send({ message: 'Producto eliminado' });
-        });
-    });
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedProduct = await ProductManager.deleteProduct(req.params.id);
+    req.io.emit('productList', await ProductManager.getAll({}, {})); // Emitir nueva lista de productos en tiempo real
+    res.json(deletedProduct);
+  } catch (error) {
+    res.status(500).send({ error: error.message || 'Error al eliminar el producto' });
+  }
 });
 
 module.exports = router;

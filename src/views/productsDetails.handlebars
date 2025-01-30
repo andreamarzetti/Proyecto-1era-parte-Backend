@@ -1,0 +1,24 @@
+<h1>{{product.title}}</h1>
+<p>{{product.description}}</p>
+<p>Price: ${{product.price}}</p>
+<p>Category: {{product.category}}</p>
+<button onclick="addToCart('{{product._id}}')">Add to Cart</button>
+
+<script>
+  function addToCart(productId) {
+    fetch(`/api/carts/add`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ productId })
+    }).then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Product added to cart');
+        } else {
+          alert('Error adding product to cart');
+        }
+      });
+  }
+</script>

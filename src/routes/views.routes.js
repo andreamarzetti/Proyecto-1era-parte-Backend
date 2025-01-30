@@ -1,27 +1,26 @@
 const express = require('express');
-const fs = require('fs');
-const path = './src/data/products.json'; // Ruta del archivo de productos
+const ProductManager = require('../managers/ProductsManager'); // Asegúrate de importar el ProductManager
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    fs.readFile(path, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).send('Error al cargar los productos');
-        }
-        const products = JSON.parse(data);
-        res.render('home', { title: 'Home', products });
-    });
+router.get('/', async (req, res) => {
+    try {
+        const products = await ProductManager.getAll({}, {});
+        res.render('home', { title: 'Home', products: products.docs });
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).send('Error al cargar los productos');
+    }
 });
 
-router.get('/realtimeproducts', (req, res) => {
-    fs.readFile(path, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).send('Error al cargar los productos');
-        }
-        const products = JSON.parse(data);
-        res.render('realTimeProducts', { title: 'Real-Time Products', products });
-    });
+router.get('/realtimeproducts', async (req, res) => {
+    try {
+        const products = await ProductManager.getAll({}, {});
+        res.render('realTimeProducts', { title: 'Real-Time Products', products: products.docs });
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).send('Error al cargar los productos');
+    }
 });
 
 module.exports = router;

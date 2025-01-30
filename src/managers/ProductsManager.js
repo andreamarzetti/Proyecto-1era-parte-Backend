@@ -1,41 +1,79 @@
-const fs = require('fs/promises');
-const path = './data/products.json';
+const mongoose = require('mongoose');
+const Product = require('../models/Products');
 
 class ProductManager {
-    async getProducts(limit) {
-        const data = JSON.parse(await fs.readFile(path, 'utf-8'));
-        return limit ? data.slice(0, limit) : data;
-    }
 
-    async getProductById(id) {
-        const data = JSON.parse(await fs.readFile(path, 'utf-8'));
-        return data.find(product => product.id === id);
-    }
-
-    async addProduct(product) {
-        const data = JSON.parse(await fs.readFile(path, 'utf-8'));
-        const newProduct = { id: Date.now().toString(), ...product, status: true };
-        data.push(newProduct);
-        await fs.writeFile(path, JSON.stringify(data, null, 2));
-        return newProduct;
-    }
-
-    async updateProduct(id, updates) {
-        const data = JSON.parse(await fs.readFile(path, 'utf-8'));
-        const index = data.findIndex(product => product.id === id);
-        if (index === -1) return null;
-        data[index] = { ...data[index], ...updates };
-        await fs.writeFile(path, JSON.stringify(data, null, 2));
-        return data[index];
-    }
-
-    async deleteProduct(id) {
-        const data = JSON.parse(await fs.readFile(path, 'utf-8'));
-        const newData = data.filter(product => product.id !== id);
-        if (data.length === newData.length) return false;
-        await fs.writeFile(path, JSON.stringify(newData, null, 2));
-        return true;
+  async getAll(query = {}, options = {}) {
+    try {
+        const products = await Product.paginate(query, options); // Usando mongoose-paginate-v2 o similar
+        return products;
+    } catch (error) {
+        console.error("Error in getAll:", error);
+        throw new Error('Error al obtener los productos');
     }
 }
 
-module.exports = ProductManager;
+    async createProduct(productData) {
+        try {
+            const product = new Product(productData);
+            await product.save();
+            return product;
+        } catch (error) {
+            console.error("Error in createProduct:", error);
+            if (error.code === 11000) {
+                throw new Error('El código del producto ya existe. Por favor, elige un código diferente.');
+            }
+            throw new Error('Error al crear el producto');
+        }
+    }
+
+    async getProductById(productId) {
+          try {
+              if (!mongoose.Types.ObjectId.isValid(productId)) {
+                  throw new Error('ID de producto inválido');
+              }
+              const product = await Product.findById(productId);
+              if (!product) {
+                  throw new Error('Producto no encontrado');
+              }
+              return product;
+          } catch (error) {
+              console.error("Error in getProductById:", error);
+              throw new Error('Error al obtener el producto');
+          }
+      }
+
+    async updateProduct(productId, updateData) {
+        try {
+            if (!mongoose.Types.ObjectId.isValid(productId)) {
+                throw new Error('ID de producto inválido');
+            }
+            const product = await Product.findByIdAndUpdate(productId, updateData, { new: true });
+            if (!product) {
+                throw new Error('Producto no encontrado');
+            }
+            return product;
+        } catch (error) {
+            console.error("Error in updateProduct:", error);
+            throw new Error('Error al actualizar el producto');
+        }
+    }
+
+    async deleteProduct(productId) {
+        try {
+            if (!mongoose.Types.ObjectId.isValid(productId)) {
+                throw new Error('ID de producto inválido');
+            }
+            const product = await Product.findByIdAndDelete(productId);
+            if (!product) {
+                throw new Error('Producto no encontrado');
+            }
+            return product;
+        } catch (error) {
+            console.error("Error in deleteProduct:", error);
+            throw new Error('Error al eliminar el producto');
+        }
+    }
+}
+
+module.exports = new ProductManager();

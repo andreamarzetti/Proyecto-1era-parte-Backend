@@ -1,15 +1,27 @@
-{{!-- Extender de la plantilla principal --}}
-{{#> main}}
-<h2>Lista de Productos</h2>
-<ul>
-    {{#each products}}
-    <li>
-        <h3>{{this.title}}</h3>
-        <p>{{this.description}}</p>
-        <p><strong>Precio:</strong> ${{this.price}}</p>
-        <p><strong>Stock:</strong> {{this.stock}}</p>
-        <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" width="150">
-    </li>
-    {{/each}}
-</ul>
-{{/main}}
+{{!< main}}
+<h1>Products</h1>
+<div id="products-list">
+  {{#each products}}
+    <div class="product">
+      <h2>{{title}}</h2>
+      <p>{{description}}</p>
+      <p>Price: {{price}}</p>
+      <p>Category: {{category}}</p>
+      <a href="/products/{{id}}">View Details</a>
+      <button onclick="addToCart('{{id}}')">Add to Cart</button>
+    </div>
+  {{/each}}
+</div>
+<script>
+  function addToCart(productId) {
+    fetch(`/api/carts/${cartId}/product/${productId}`, {
+      method: 'POST'
+    }).then(response => {
+      if (response.ok) {
+        alert('Product added to cart');
+      } else {
+        alert('Unable to add product to cart');
+      }
+    });
+  }
+</script>
