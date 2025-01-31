@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
-// URL para la base de datos local
-const localURI = 'mongodb://localhost:27017/miapp';
-// URL para MongoDB Atlas (reemplaza con tu contraseña)
-const atlasURI = "mongodb+srv://AndreaMarzetti:sanlorenzo999@cluster1.ecdutkg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1";
-
 // Función para conectar a MongoDB usando Mongoose
 const connectMongoose = async (uri) => {
   try {
@@ -41,7 +36,7 @@ const connectMongoClient = async (uri) => {
 // Función principal para conectar a la base de datos
 const connectDB = async () => {
   const useAtlas = process.env.USE_ATLAS === 'true';
-  const uri = useAtlas ? atlasURI : localURI;
+  const uri = process.env.MONGODB_URI;
   if (useAtlas) {
     await connectMongoClient(uri);
   } else {

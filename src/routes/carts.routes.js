@@ -16,27 +16,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.post('/api/carts/add', async (req, res) => {
-  try {
-    const { productId } = req.body;
-    const cart = await Cart.findOne({ userId: req.user._id }); // Ajusta esto según tu lógica de autenticación
-    if (!cart) {
-      return res.status(404).send({ error: 'Carrito no encontrado' });
-    }
-    const productIndex = cart.products.findIndex(p => p.productId.equals(productId));
-    if (productIndex > -1) {
-      cart.products[productIndex].quantity += 1;
-    } else {
-      cart.products.push({ productId, quantity: 1 });
-    }
-    await cart.save();
-    res.send({ success: true, cart });
-  } catch (error) {
-    console.error("Error al agregar el producto al carrito:", error);
-    res.status(500).send({ error: 'Error al agregar el producto al carrito' });
-  }
-});
-
 // Obtener todos los carritos
 router.get('/', async (req, res) => {
   try {

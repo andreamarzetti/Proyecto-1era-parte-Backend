@@ -1,5 +1,5 @@
 const express = require('express');
-const ProductManager = require('../managers/ProductsManager'); // Asegúrate de importar el ProductManager
+const ProductManager = require('../managers/ProductsManager');
 
 const router = express.Router();
 
