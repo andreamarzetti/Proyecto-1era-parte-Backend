@@ -31,19 +31,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/products/:pid', async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.pid);
-    if (!product) {
-      return res.status(404).send({ error: 'Producto no encontrado' });
-    }
-    res.render('productDetails', { product });
-  } catch (error) {
-    console.error("Error al obtener el producto:", error);
-    res.status(500).send({ error: 'Error al obtener el producto' });
-  }
-});
-
 // Crear un nuevo producto
 router.post('/', async (req, res) => {
   try {

@@ -81,6 +81,7 @@ class CartManager {
             const cart = await this.getCartById(cartId);
             cart.products = products.map(p => ({
                 productId: mongoose.Types.ObjectId(p.product),
+                productId : p.product,
                 quantity: p.quantity
             }));
             await cart.save();
