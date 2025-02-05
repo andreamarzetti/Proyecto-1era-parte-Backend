@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const Cart = require('../models/Carts');  
-const ProductManager = require('./ProductsManager');  // Importar ProductManager
+const Cart = require('../models/Carts');
+const ProductManager = require('./ProductsManager');  
 
 class CartManager {
     async createCart(userId) {
@@ -80,8 +80,7 @@ class CartManager {
         try {
             const cart = await this.getCartById(cartId);
             cart.products = products.map(p => ({
-                productId: mongoose.Types.ObjectId(p.product),
-                productId : p.product,
+                productId: new mongoose.Types.ObjectId(p.productId),
                 quantity: p.quantity
             }));
             await cart.save();
