@@ -6,7 +6,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
-const connectDB = require('./db'); // Importar la conexión a la base de datos
+const connectDB = require('./db');
 
 // Conectar a la base de datos
 connectDB();
@@ -31,8 +31,8 @@ app.set('views', path.join(__dirname, 'views'));
 // Middleware para JSON, formularios y cookies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser('secretKey')); // Firmar cookies con una clave secreta
-app.use(passport.initialize()); // Inicializar Passport
+app.use(cookieParser(process.env.SECRET_KEY)); // Firmar cookies con una clave secreta
+app.use(passport.initialize());
 
 // Middleware para pasar io a las rutas
 app.use((req, res, next) => {
@@ -42,6 +42,8 @@ app.use((req, res, next) => {
 
 // Configuración de Passport
 require('./config/passport');
+
+exports.authenticateJWT = passport.authenticate('jwt', { session: false });
 
 // Rutas principales
 const productsRoutes = require('./routes/products.routes');

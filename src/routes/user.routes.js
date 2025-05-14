@@ -1,44 +1,16 @@
 const express = require('express');
 const passport = require('passport');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const usersController = require('../controllers/usersController');
 
 const router = express.Router();
 
-router.post('/register', async (req, res) => {
-  try {
-    const { first_name, last_name, email, age, password } = req.body;
+// Register a new user
+router.post('/register', usersController.register);
 
-    const newUser = new User({ first_name, last_name, email, age, password });
-    await newUser.save();
+// Login a user and issue a token
+router.post('/login', usersController.login);
 
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign({ id: user._id, role: user.role }, 'secretKey', { expiresIn: '1h' });
-    res.cookie('currentUser', token, { httpOnly: true, signed: true });
-
-    res.status(200).json({ message: 'Login successful' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
-  res.json(req.user);
-});
+// Fetch the current user's data using JWT authentication
+router.get('/current', passport.authenticate('jwt', { session: false }), usersController.getCurrent);
 
 module.exports = router;

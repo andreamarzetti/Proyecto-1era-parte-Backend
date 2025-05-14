@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket de Compra</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Ticket de Compra</h1>
+  </header>
+  <main>
+    <section class="ticket">
+      <div class="ticket-header">
+        <p><strong>Cliente:</strong> {{customerName}}</p>
+        <p><strong>ID del Ticket:</strong> {{ticketId}}</p>
+        <p><strong>Fecha:</strong> {{date}}</p>
+      </div>
+      
+      <div class="ticket-body">
+        <h2>Productos</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each products}}
+            <tr>
+              <td>{{name}}</td>
+              <td>{{quantity}}</td>
+              <td>{{price}}</td>
+              <td>{{subtotal}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ticket-footer">
+        <p><strong>Total:</strong> {{total}}</p>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>Gracias por tu compra.</p>
+  </footer>
+</body>
+</html>
